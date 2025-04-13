@@ -1,10 +1,10 @@
 # Carpetas de build que no deben subirse
-/build/
-/app/build/
-/.gradle/
+.gradle/
 .idea/
+build/
+app/build/
 
-# Caches y temporales
+# Caches y archivos temporales
 *.iml
 *.log
 *.zip
@@ -16,10 +16,9 @@
 *.hprof
 *.DS_Store
 
-# Android Studio
+# Archivos específicos de Android Studio
 /local.properties
-/.gradle/
-/*.keystore
+*.keystore
 
 # Archivos grandes que genera Android Studio
 **/zip-cache/
