@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.example.cardflex.app-debug-69:/drawable_logo_cardflow.png.flat",
+        "source": "com.example.cardflex.app-main-71:/drawable/logo_cardflow.png"
+    },
+    {
+        "merged": "com.example.cardflex.app-debug-69:/xml_file_paths.xml.flat",
+        "source": "com.example.cardflex.app-main-71:/xml/file_paths.xml"
+    }
+]

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "224126911992",
+    "project_id": "carflex-cbf89",
+    "storage_bucket": "carflex-cbf89.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:224126911992:android:9e48be9fcdfed1f18a820d",
+        "android_client_info": {
+          "package_name": "com.example.cardflex"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwyz8gnrs8w3Ftt29R76J0DsQzQAeXBCg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

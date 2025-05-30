@@ -19,17 +19,55 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.cardflex.util.IdiomaManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import androidx.compose.runtime.collectAsState
+
+fun obtenerUltimaTarjetaId(onResult: (String?) -> Unit) {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    if (uid == null) {
+        onResult(null)
+        return
+    }
+
+    val ref = FirebaseDatabase.getInstance().getReference("tarjetas").child(uid)
+    ref.limitToLast(1).addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(snapshot: DataSnapshot) {
+            val tarjetaId = snapshot.children.firstOrNull()?.key
+            onResult(tarjetaId)
+        }
+
+        override fun onCancelled(error: DatabaseError) {
+            onResult(null)
+        }
+    })
+}
 
 @Composable
 fun DashboardScreen(navController: NavHostController) {
+    val idioma by IdiomaManager.idioma.collectAsState()
     var selectedTab by remember { mutableStateOf("contactos") }
+
+    val textos = mapOf(
+        "buscar" to mapOf("es" to "Buscar", "en" to "Search"),
+        "perfil" to mapOf("es" to "Perfil", "en" to "Profile"),
+        "contactos" to mapOf("es" to "CONTACTOS", "en" to "CONTACTS"),
+        "escanear_tarjeta" to mapOf("es" to "ESCANEAR TARJETA", "en" to "SCAN CARD"),
+        "crear_contacto" to mapOf("es" to "Crear contacto", "en" to "Create contact"),
+        "detalle_contacto" to mapOf("es" to "Detalle de contacto", "en" to "Contact details"),
+        "configuracion" to mapOf("es" to "Configuración", "en" to "Settings"),
+        "crear_tarjeta" to mapOf("es" to "Crear tarjeta Digital", "en" to "Create Digital Card"),
+        "detalle_tarjeta" to mapOf("es" to "Detalle de Tarjetas", "en" to "Card Details"),
+        "importar_tarjetas" to mapOf("es" to "Importar Tarjetas", "en" to "Import Cards"),
+        "ir" to mapOf("es" to "Ir", "en" to "Go")
+    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Barra de búsqueda con ícono y avatar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -38,17 +76,17 @@ fun DashboardScreen(navController: NavHostController) {
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Color.Gray)
+            Icon(Icons.Default.Search, contentDescription = textos["buscar"]?.get(idioma), tint = Color.Gray)
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Buscar",
+                text = textos["buscar"]?.get(idioma) ?: "",
                 color = Color.Gray,
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.Default.Person,
-                contentDescription = "Perfil",
+                contentDescription = textos["perfil"]?.get(idioma),
                 tint = Color.Gray,
                 modifier = Modifier
                     .size(28.dp)
@@ -57,12 +95,10 @@ fun DashboardScreen(navController: NavHostController) {
                         navController.navigate("info_usuario")
                     }
             )
-
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tabs
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,39 +106,42 @@ fun DashboardScreen(navController: NavHostController) {
                 .padding(4.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            TabButton("CONTACTOS", selectedTab == "contactos") {
+            TabButton(textos["contactos"]?.get(idioma) ?: "", selectedTab == "contactos") {
                 selectedTab = "contactos"
             }
-            TabButton("ESCANEAR TARJETA", selectedTab == "escanear") {
+            TabButton(textos["escanear_tarjeta"]?.get(idioma) ?: "", selectedTab == "escanear") {
                 selectedTab = "escanear"
             }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Contenido dinámico
         if (selectedTab == "contactos") {
-            DashboardOption("Crear contacto", Color(0xFF9C27B0)) {
+            DashboardOption(textos["crear_contacto"]?.get(idioma) ?: "", Color(0xFF9C27B0), textos["ir"]?.get(idioma) ?: "Ir") {
                 navController.navigate("crear_contacto")
             }
-            DashboardOption("Detalle de contacto", Color(0xFFE91E63)) {
+            DashboardOption(textos["detalle_contacto"]?.get(idioma) ?: "", Color(0xFFE91E63), textos["ir"]?.get(idioma) ?: "Ir") {
                 navController.navigate("contacto_detalle")
             }
-            DashboardOption("Configuración", Color(0xFFFF9800)) {
+            DashboardOption(textos["configuracion"]?.get(idioma) ?: "", Color(0xFFFF9800), textos["ir"]?.get(idioma) ?: "Ir") {
                 navController.navigate("configuracion")
             }
         } else {
-            DashboardOption("Crear tarjeta Digital", Color(0xFF9C27B0)) {
+            DashboardOption(textos["crear_tarjeta"]?.get(idioma) ?: "", Color(0xFF9C27B0), textos["ir"]?.get(idioma) ?: "Ir") {
                 navController.navigate("crear_tarjeta")
             }
-            DashboardOption("Detalle de Tarjetas", Color(0xFFE91E63)) {
-                navController.navigate("detalle_tarjeta")
+            DashboardOption(textos["detalle_tarjeta"]?.get(idioma) ?: "", Color(0xFFE91E63), textos["ir"]?.get(idioma) ?: "Ir") {
+                obtenerUltimaTarjetaId { id ->
+                    if (id != null) {
+                        navController.navigate("detalle_tarjeta/$id")
+                    } else {
+                        println("⚠️ No se encontró ninguna tarjeta para este usuario.")
+                    }
+                }
             }
-            DashboardOption("Importar Tarjetas", Color(0xFF4CAF50)) {
-
+            DashboardOption(textos["importar_tarjetas"]?.get(idioma) ?: "", Color(0xFF4CAF50), textos["ir"]?.get(idioma) ?: "Ir") {
                 navController.navigate("tarjetas_escaneadas")
             }
-
 
             Row(
                 modifier = Modifier
@@ -136,7 +175,6 @@ fun DashboardScreen(navController: NavHostController) {
     }
 }
 
-
 @Composable
 fun TabButton(text: String, selected: Boolean, onClick: () -> Unit) {
     val background = if (selected) Color.White else Color.Transparent
@@ -158,7 +196,12 @@ fun TabButton(text: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun DashboardOption(text: String, iconColor: Color, onClick: () -> Unit) {
+fun DashboardOption(
+    text: String,
+    iconColor: Color,
+    goText: String,
+    onClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,6 +228,10 @@ fun DashboardOption(text: String, iconColor: Color, onClick: () -> Unit) {
             modifier = Modifier.weight(1f)
         )
 
-        Icon(Icons.Default.ArrowForwardIos, contentDescription = "Ir", tint = Color.Gray)
+        Icon(
+            Icons.Default.ArrowForwardIos,
+            contentDescription = goText,
+            tint = Color.Gray
+        )
     }
 }

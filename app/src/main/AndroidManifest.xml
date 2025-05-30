@@ -1,20 +1,56 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.cardflex">
 
+    <!-- Permisos necesarios -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Acceso a cámara trasera -->
+    <uses-feature android:name="android.hardware.camera.any" />
+
     <application
         android:allowBackup="true"
         android:label="CardFlex"
-        android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar">
+        android:supportsRtl="true">
+
+    <!-- Firebase Sign-In -->
+        <meta-data
+            android:name="com.google.android.gms.auth.api.signin.v2.DEFAULT_SIGN_IN"
+            android:value="true" />
+
+        <!-- 👇 FileProvider para compartir archivos (PDF/XML) -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.cardflex.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <activity
-            android:name="MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
+
+            <!-- Lanzador principal -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Redirección de autenticación con Google -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="com.example.cardflex"
+                    android:host="oauth2redirect" />
+            </intent-filter>
+
         </activity>
 
     </application>
+
 </manifest>
